@@ -6,6 +6,7 @@ import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
@@ -63,6 +64,11 @@ public class UserController {
     @PostMapping("/api/short-link/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
         userService.register(requestParam);
+        return Results.success();
+    }
+    @PutMapping("/api/short-link/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateDTO requestParam) {
+        userService.update(requestParam);
         return Results.success();
     }
 }

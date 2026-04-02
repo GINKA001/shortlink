@@ -10,6 +10,7 @@ import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.ginka.shortlink.shortlink.admin.dao.entity.UserDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.UserMapper;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -82,5 +83,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public void update(UserUpdateDTO requestParam) {
+        //ToDO 验证当前用户是否登录
+
+        LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername());
+        baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), eq);
     }
 }
