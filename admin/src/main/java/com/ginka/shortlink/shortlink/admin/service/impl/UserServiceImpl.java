@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ginka.shortlink.shortlink.admin.common.constant.RedisCacheConstant;
 import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.ginka.shortlink.shortlink.admin.dao.entity.UserDO;
@@ -12,7 +13,10 @@ import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.redisson.Redisson;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
+    private final RedissonClient redissonClient;// RedissonClient分布式锁
     @Override
     public UserRespDTO getUserByUsername(String username) {
         LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
@@ -57,10 +62,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if(hasUserName(requestParam.getUsername())){
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
-        int insert = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
-        if (insert < 1) {
-            throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+        RLock lock = redissonClient.getLock(RedisCacheConstant.LOCK_USER_REGISTER_KEY);
+        /**
+         * 应对并发恶意请求
+         * 尝试获取锁
+         * 获取锁成功 继续执行业务逻辑
+         * 获取锁失败 抛出异常
+         * 释放锁
+         */
+        try {
+            if(lock.tryLock()) {
+                int insert = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
+                if (insert < 1) {
+                    throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+                }
+                userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+                return;
+            }
+            throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
+        } finally {
+            lock.unlock();
         }
-        userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
     }
 }
