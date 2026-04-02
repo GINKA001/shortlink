@@ -1,7 +1,10 @@
 package com.ginka.shortlink.shortlink.admin.controller;
 
+import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
+import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
+import com.ginka.shortlink.shortlink.admin.common.web.GlobalExceptionHandler;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 
@@ -25,11 +28,8 @@ public class UserController {
     public Result<UserRespDTO> getUserByUsername(@PathVariable("username") String username) {
         UserRespDTO userRespDTO = userService.getUserByUsername(username);
         if (userRespDTO == null) {
-            return new Result<UserRespDTO>().setCode(UserErrorCodeEnum.USER_NULL.code()).setMessage(UserErrorCodeEnum.USER_NULL.message());
+            throw new ClientException(UserErrorCodeEnum.USER_NULL);
         }
-        Result<UserRespDTO> result = new Result<>();
-        result.setCode("0");
-        result.setData(userRespDTO);
-        return result;
+        return Results.success(userRespDTO);
     }
 }
