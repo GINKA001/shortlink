@@ -13,7 +13,6 @@ import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.redisson.Redisson;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -63,7 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
         RLock lock = redissonClient.getLock(RedisCacheConstant.LOCK_USER_REGISTER_KEY);
-        /**
+        /*
          * 应对并发恶意请求
          * 尝试获取锁
          * 获取锁成功 继续执行业务逻辑
