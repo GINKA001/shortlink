@@ -5,17 +5,13 @@ import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientExc
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
-import com.ginka.shortlink.shortlink.admin.common.web.GlobalExceptionHandler;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 /*
 * 用户管理控制层
 */
@@ -25,10 +21,10 @@ public class UserController {
     private final UserService userService;
     /**
      * 根据用户名获取用户信息
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return 用户信息
      */
-    @GetMapping("/api/shortlink/v1/user/{username}")//@PathVariable 获取路径参数
+    @GetMapping("/api/short-link/v1/user/{username}")//@PathVariable 获取路径参数
     public Result<UserRespDTO> getUserByUsername(@PathVariable("username") String username) {
         UserRespDTO userRespDTO = userService.getUserByUsername(username);
         if (userRespDTO == null) {
@@ -36,7 +32,12 @@ public class UserController {
         }
         return Results.success(userRespDTO);
     }
-    @GetMapping("/api/shortlink/v1/actual/user/{username}")//@PathVariable 获取路径参数
+    /**
+     * 根据用户名获取用户信息
+     * @param username 用户名
+     * @return 用户信息
+     */
+    @GetMapping("/api/short-link/v1/actual/user/{username}")//@PathVariable 获取路径参数
     public Result<UserActualRespDTO> getActualUserByUsername(@PathVariable("username") String username) {
         UserRespDTO userRespDTO = userService.getUserByUsername(username);
         if (userRespDTO == null) {
@@ -44,8 +45,24 @@ public class UserController {
         }
         return Results.success(BeanUtil.toBean(userRespDTO, UserActualRespDTO.class));
     }
-    @GetMapping("/api/shortlink/v1/user/has-username")
+    /**
+     * 判断用户名是否存在
+     * @param username 用户名
+     * @return true:存在 false:不存在
+     */
+    @GetMapping("/api/short-link/v1/user/has-username")
     public Result<Boolean> hasUserName(@RequestParam("username") String username) {
-        return Results.success(userService.hasUserName(username));
+        return Results.success(!userService.hasUserName(username));
+    }
+    /**
+     * 用户注册
+     * @param requestParam 请求参数
+     * @return null
+     */
+
+    @PostMapping("/api/short-link/v1/user")
+    public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
+        userService.register(requestParam);
+        return Results.success();
     }
 }

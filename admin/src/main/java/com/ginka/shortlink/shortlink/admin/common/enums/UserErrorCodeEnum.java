@@ -4,7 +4,9 @@ import com.ginka.shortlink.shortlink.admin.common.convention.errorcode.IErrorCod
 
 public enum UserErrorCodeEnum implements IErrorCode {
     USER_NULL("B0002000","用户不存在"),
-    USER_EXIST("B0002001","用户已存在");
+    USER_NAME_EXIST("B0002001","用户名已存在"),
+    USER_EXIST("B0002002","用户记录已存在"),
+    USER_SAVE_ERROR("B0002003","用户保存失败");
 
     private final String code;
     private final String message;
