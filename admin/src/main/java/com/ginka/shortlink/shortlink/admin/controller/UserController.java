@@ -5,9 +5,11 @@ import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientExc
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserActualRespDTO;
+import com.ginka.shortlink.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -66,9 +68,28 @@ public class UserController {
         userService.register(requestParam);
         return Results.success();
     }
+    /**
+     * 用户更新
+     * @param requestParam 请求参数
+     * @return null
+     */
     @PutMapping("/api/short-link/v1/user")
     public Result<Void> update(@RequestBody UserUpdateDTO requestParam) {
         userService.update(requestParam);
         return Results.success();
+    }
+    @PostMapping("/api/short-link/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO requestParam){
+        return Results.success(userService.login(requestParam));
+    }
+    /**
+     * 检查用户是否登录
+     * @param token 用户token
+     * @return true:已登录 false:未登录
+     */
+    @GetMapping("/api/short-link/v1/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username,@RequestParam("token") String token){
+        ;
+        return Results.success(userService.checkLogin(username,token));
     }
 }

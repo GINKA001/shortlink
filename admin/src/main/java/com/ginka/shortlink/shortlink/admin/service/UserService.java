@@ -2,8 +2,10 @@ package com.ginka.shortlink.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ginka.shortlink.shortlink.admin.dao.entity.UserDO;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
+import com.ginka.shortlink.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
@@ -29,4 +31,17 @@ public interface UserService extends IService<UserDO> {
      * @param requestParam 更新参数
      */
     void update(UserUpdateDTO requestParam);
+    /**
+     * 用户登录
+     * @param requestParam 用户登录请求体
+     * @return token
+     */
+    UserLoginRespDTO login(UserLoginReqDTO requestParam);
+    /**
+     * 验证用户登录
+     * @param token token
+     * @param username 用户名
+     * @return true:登录成功 false:登录失败
+     */
+    Boolean checkLogin(String username,String token);
 }

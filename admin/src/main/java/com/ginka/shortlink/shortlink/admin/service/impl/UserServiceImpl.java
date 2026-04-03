@@ -1,6 +1,9 @@
 package com.ginka.shortlink.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.digest.MD5;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,8 +12,10 @@ import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientExc
 import com.ginka.shortlink.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.ginka.shortlink.shortlink.admin.dao.entity.UserDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.UserMapper;
+import com.ginka.shortlink.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
+import com.ginka.shortlink.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +23,14 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户服务实现类
@@ -29,6 +41,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;// RedissonClient分布式锁
+    private final StringRedisTemplate stringRedisTemplate;
     @Override
     public UserRespDTO getUserByUsername(String username) {
         LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
@@ -91,5 +104,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername());
         baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), eq);
+    }
+
+    @Override
+    public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
+        LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername()).eq(UserDO::getPassword, requestParam.getPassword()).eq(UserDO::getDel_flag,0);
+        UserDO userDO = baseMapper.selectOne(eq);
+        if(userDO==null){
+            throw new ClientException("用户不存在");
+        }
+        Boolean hasLogin = stringRedisTemplate.hasKey("login_"+requestParam.getUsername());
+        if(hasLogin!=null && hasLogin){
+            throw new ClientException("用户已登录");
+        }
+        /**
+         *
+         * 生成token
+         */
+        String uuid = UUID.randomUUID().toString();
+        stringRedisTemplate.opsForValue().set(uuid,JSON.toJSONString(userDO),30L, TimeUnit.MINUTES);
+        //存储用户信息
+        Map<String,Object> userInfoMap=new HashMap<>();
+        userInfoMap.put("token",JSON.toJSONString(userDO));
+        //
+        stringRedisTemplate.opsForHash().put("login_"+requestParam.getUsername(),uuid,JSON.toJSONString(userDO));
+        stringRedisTemplate.expire("login_"+requestParam.getUsername(),30L,TimeUnit.MINUTES);
+
+        return new UserLoginRespDTO(uuid);
+    }
+
+    @Override
+    public Boolean checkLogin(String username,String token) {
+        Object tokenValue = stringRedisTemplate.opsForHash().get("login_" + username, token);//获取用户信息
+        return tokenValue != null;
+
     }
 }
