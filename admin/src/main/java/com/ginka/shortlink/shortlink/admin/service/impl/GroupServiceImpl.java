@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.admin.common.biz.user.UserContext;
+import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
@@ -62,6 +63,23 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0);
         GroupDO groupDO = new GroupDO();
         groupDO.setName(requestParam.getName());
+        baseMapper.update(groupDO, eq);
+    }
+
+    @Override
+    public void deleteGroup(String gid) {
+//        LambdaQueryWrapper<GroupDO> eq = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getGid, gid);
+//        GroupDO groupDO = baseMapper.selectOne(eq);
+//        if(groupDO==null){
+//            throw new ClientException("分组不存在");
+//        }
+//        baseMapper.delete(eq);
+        //软删除
+        LambdaQueryWrapper<GroupDO> eq = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid,gid)
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setDelFlag(1);
         baseMapper.update(groupDO, eq);
     }
 }
