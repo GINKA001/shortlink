@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.admin.common.biz.user.UserContext;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
+import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.GroupService;
 import com.ginka.shortlink.shortlink.admin.util.RandomCodeUtils;
@@ -52,5 +53,15 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOS = baseMapper.selectList(groupDOLambdaQueryWrapper);
         return BeanUtil.copyToList(groupDOS, ShortLinkGroupRespDTO.class);//copyToList 批量转换
+    }
+
+    @Override
+    public void updateGroup(ShortLinkGroupUpdateReqDTO requestParam) {
+        LambdaQueryWrapper<GroupDO> eq = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, requestParam.getGid())
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setName(requestParam.getName());
+        baseMapper.update(groupDO, eq);
     }
 }
