@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
+import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 
@@ -31,4 +32,10 @@ public interface GroupService extends IService<GroupDO> {
      * @return 空结果
      */
     void deleteGroup(String gid);
+
+    /**
+     * 分组排序
+     * @param requestParam 排序参数
+     */
+    void sortGroup(List<ShortLinkGroupSortReqDTO> requestParam);
 }

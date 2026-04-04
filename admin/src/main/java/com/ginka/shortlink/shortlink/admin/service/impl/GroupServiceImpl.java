@@ -8,6 +8,7 @@ import com.ginka.shortlink.shortlink.admin.common.biz.user.UserContext;
 import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
+import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.GroupService;
@@ -81,5 +82,23 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = new GroupDO();
         groupDO.setDelFlag(1);
         baseMapper.update(groupDO, eq);
+    }
+/**
+ * 短链接分组排序
+ * 更新排序字段
+ */
+    @Override
+    public void sortGroup(List<ShortLinkGroupSortReqDTO> requestParam) {
+        requestParam.forEach(item -> {
+            GroupDO groupDO=GroupDO.builder()
+                    .username(UserContext.getUsername())
+                    .sortOrder(item.getSortOrder())
+                    .build();
+            LambdaQueryWrapper<GroupDO> eq = Wrappers.lambdaQuery(GroupDO.class)
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getGid, item.getGid())
+                    .eq(GroupDO::getDelFlag, 0);
+            baseMapper.update(groupDO, eq);
+        });
     }
 }
