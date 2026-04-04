@@ -3,6 +3,7 @@ package com.ginka.shortlink.shortlink.admin.dao.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ginka.shortlink.shortlink.admin.common.database.BaseDO;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,7 +13,7 @@ import java.util.Date;
  */
 @Data
 @TableName("t_user")
-public class UserDO {
+public class UserDO extends BaseDO {
     private Long id;
     private String username;
     private String password;
@@ -20,12 +21,5 @@ public class UserDO {
     private String phone;
     private String mail;
     private int deletion_time;
-    @TableField(fill = FieldFill.INSERT)
-    private Date create_time;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date update_time;
-    @TableField(fill = FieldFill.INSERT)
-    private int del_flag;
-
 
 }

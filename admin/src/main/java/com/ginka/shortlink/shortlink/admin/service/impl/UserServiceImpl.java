@@ -101,14 +101,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public void update(UserUpdateDTO requestParam) {
         //ToDO 验证当前用户是否登录
-
         LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername());
         baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), eq);
     }
 
     @Override
     public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
-        LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername()).eq(UserDO::getPassword, requestParam.getPassword()).eq(UserDO::getDel_flag,0);
+        LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername()).eq(UserDO::getPassword, requestParam.getPassword()).eq(UserDO::getDelFlag,0);
         UserDO userDO = baseMapper.selectOne(eq);
         if(userDO==null){
             throw new ClientException("用户不存在");
