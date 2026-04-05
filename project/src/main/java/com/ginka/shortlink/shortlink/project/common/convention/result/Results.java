@@ -1,7 +1,9 @@
 package com.ginka.shortlink.shortlink.project.common.convention.result;
 
-import com.ginka.shortlink.shortlink.admin.common.convention.errorcode.BaseErrorCode;
-import com.ginka.shortlink.shortlink.admin.common.convention.exception.AbstractException;
+
+
+import com.ginka.shortlink.shortlink.project.common.convention.errorcode.BaseErrorCode;
+import com.ginka.shortlink.shortlink.project.common.convention.exception.AbstractException;
 
 import java.util.Optional;
 

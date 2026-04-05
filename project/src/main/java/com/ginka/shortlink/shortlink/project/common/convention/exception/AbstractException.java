@@ -1,6 +1,7 @@
 package com.ginka.shortlink.shortlink.project.common.convention.exception;
 
-import com.ginka.shortlink.shortlink.admin.common.convention.errorcode.IErrorCode;
+
+import com.ginka.shortlink.shortlink.project.common.convention.errorcode.IErrorCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 

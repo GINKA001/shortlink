@@ -1,7 +1,8 @@
 package com.ginka.shortlink.shortlink.project.common.convention.exception;
 
-import com.ginka.shortlink.shortlink.admin.common.convention.errorcode.BaseErrorCode;
-import com.ginka.shortlink.shortlink.admin.common.convention.errorcode.IErrorCode;
+
+import com.ginka.shortlink.shortlink.project.common.convention.errorcode.BaseErrorCode;
+import com.ginka.shortlink.shortlink.project.common.convention.errorcode.IErrorCode;
 
 public class RemoteException extends AbstractException {
 

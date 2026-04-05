@@ -1,11 +1,12 @@
 package com.ginka.shortlink.shortlink.project.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
 
-@TableName("t_link")
+@TableName("t_link_0")
 @Data
 public class ShortLinkDO {
 
@@ -67,6 +68,7 @@ public class ShortLinkDO {
     /**
      * 描述
      */
+    @TableField("`describe`")
     private String describe;
 
     /**
