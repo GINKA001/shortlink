@@ -1,9 +1,12 @@
 package com.ginka.shortlink.shortlink.project.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 
 public interface ShortLinkService extends IService<ShortLinkDO> {
     /**
@@ -12,4 +15,11 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @return 创建链接响应参数
      */
     ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam);
+
+    /**
+     * 分页查询短链接
+     * @param requestParam 分页参数
+     * @return 分页查询结果
+     */
+    IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam);
 }
