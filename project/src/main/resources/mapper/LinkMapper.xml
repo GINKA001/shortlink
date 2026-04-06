@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper">
+
+    <select id="listGroupShortLinkCount" resultType="com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO" >
+    SELECT
+    gid,
+    COUNT(*) AS shortLinkCount
+    FROM t_link
+    WHERE enable_status = 0
+    AND gid IN
+    <foreach collection="requestParam" item="gid" open="(" separator="," close=")">
+        #{gid}
+    </foreach>
+    GROUP BY gid
+    </select>
+</mapper>

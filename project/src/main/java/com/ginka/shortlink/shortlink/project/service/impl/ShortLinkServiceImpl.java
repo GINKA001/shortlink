@@ -76,14 +76,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
 
     @Override
     public List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
-
-        QueryWrapper<ShortLinkDO> shortLinkDOQueryWrapper = Wrappers.query(new ShortLinkDO())
-                .select("gid as gid,count(*) as shortLinkCount")
-                .in("gid", requestParam)
-                .eq("enable_status", 0)
-                .groupBy("gid");
-        List<Map<String, Object>> maps = baseMapper.selectMaps(shortLinkDOQueryWrapper);
-        return BeanUtil.copyToList(maps, ShortLinkCountQueryRespDTO.class);
+       return baseMapper.listGroupShortLinkCount(requestParam);
     }
 
     // 生成短链接后缀  添加布隆过滤器 避免缓存穿透
