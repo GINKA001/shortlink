@@ -17,6 +17,7 @@ import com.ginka.shortlink.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.UserUpdateDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.UserRespDTO;
+import com.ginka.shortlink.shortlink.admin.service.GroupService;
 import com.ginka.shortlink.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
@@ -42,6 +43,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;// RedissonClient分布式锁
     private final StringRedisTemplate stringRedisTemplate;
+    private final GroupService groupService;
     @Override
     public UserRespDTO getUserByUsername(String username) {
         LambdaQueryWrapper<UserDO> eq = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
@@ -90,8 +92,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                     throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
                 }
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+                //创建默认分组
+                groupService.saveGroup(requestParam.getUsername(),"默认分组");
                 return;
             }
+
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         } finally {
             lock.unlock();

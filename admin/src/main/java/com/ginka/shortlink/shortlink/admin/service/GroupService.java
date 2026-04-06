@@ -16,6 +16,11 @@ public interface GroupService extends IService<GroupDO> {
     void saveGroup(String groupName);
 
     /**
+     * 保存分组
+     * @param groupName 分组名称
+     */
+    void saveGroup(String username, String groupName);
+    /**
      * 获取分组集合
      * @return 分组信息
      */

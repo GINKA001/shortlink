@@ -6,11 +6,14 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.admin.common.biz.user.UserContext;
 import com.ginka.shortlink.shortlink.admin.common.convention.exception.ClientException;
+import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
+import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.GroupService;
 import com.ginka.shortlink.shortlink.admin.util.RandomCodeUtils;
 import lombok.Builder;
@@ -18,23 +21,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 短链接分组服务实现层
  */
 @Service
 @Slf4j
+
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+    ShortLinkRemoteService shortLinkRemoteService=new ShortLinkRemoteService(){};
 
     @Override
-    public void saveGroup(String groupName) {
+    public void saveGroup(String groupName){
+        saveGroup(UserContext.getUsername(),groupName);
+    }
+    @Override
+    public void saveGroup(String username,String groupName) {
         String gid="";
         while(true) {
             gid = RandomCodeUtils.generateSecureRandomCode();
             LambdaQueryWrapper<GroupDO> eq = Wrappers.lambdaQuery(GroupDO.class)
                     .eq(GroupDO::getGid, gid)
                     // 设置用户名
-                    .eq(GroupDO::getUsername, UserContext.getUsername());
+                    .eq(GroupDO::getUsername,username);
             if (baseMapper.selectOne(eq) == null) {
                 break;
             }
@@ -56,7 +67,13 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0)
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOS = baseMapper.selectList(groupDOLambdaQueryWrapper);
-        return BeanUtil.copyToList(groupDOS, ShortLinkGroupRespDTO.class);//copyToList 批量转换
+        Result<List<ShortLinkCountQueryRespDTO>> listResult = shortLinkRemoteService.listGroupShortLinkCount(groupDOS.stream().map(GroupDO::getGid).toList());
+        List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOS = BeanUtil.copyToList(groupDOS, ShortLinkGroupRespDTO.class);
+        shortLinkGroupRespDTOS.forEach(each -> {
+            Optional<ShortLinkCountQueryRespDTO> first = listResult.getData().stream().filter(item-> Objects.equals(item.getGid(), each.getGid())).findFirst();
+            first.ifPresent(item->each.setShortLinkCount(first.get().getShortLinkCount()));
+        });
+        return shortLinkGroupRespDTOS;
     }
 
     @Override

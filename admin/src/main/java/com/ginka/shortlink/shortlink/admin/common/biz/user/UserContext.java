@@ -15,7 +15,6 @@ public class UserContext {
     public static void setUser(UserInfoDTO user) {
         USER_THREAD_LOCAL.set(user);
     }
-
     /**
      * 获取上下文中用户 ID
      *

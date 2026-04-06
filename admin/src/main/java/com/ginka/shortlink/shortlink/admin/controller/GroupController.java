@@ -24,7 +24,7 @@ public class GroupController {
 
     /**
      * 短链接分组
-     * @return
+     * @return 分组类别及短链接数量
      */
     @GetMapping("/api/short-link/admin/v1/group")
     public Result<List<ShortLinkGroupRespDTO>> listGroup() {
