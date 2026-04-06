@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +12,7 @@ import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
@@ -20,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -67,6 +72,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         //将查询的DO转化为响应参数
         IPage<ShortLinkPageRespDTO> convert1 = page0.convert(item -> BeanUtil.toBean(item, ShortLinkPageRespDTO.class));
         return convert1;
+    }
+
+    @Override
+    public List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
+
+        QueryWrapper<ShortLinkDO> shortLinkDOQueryWrapper = Wrappers.query(new ShortLinkDO())
+                .select("gid as gid,count(*) as shortLinkCount")
+                .in("gid", requestParam)
+                .eq("enable_status", 0)
+                .groupBy("gid");
+        List<Map<String, Object>> maps = baseMapper.selectMaps(shortLinkDOQueryWrapper);
+        return BeanUtil.copyToList(maps, ShortLinkCountQueryRespDTO.class);
     }
 
     // 生成短链接后缀  添加布隆过滤器 避免缓存穿透

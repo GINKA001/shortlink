@@ -5,11 +5,14 @@ import com.ginka.shortlink.shortlink.project.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 短链接控制器
@@ -32,5 +35,14 @@ public class LinkController {
     @GetMapping("/api/short-link/v1/list")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return Results.success(shortLinkService.pageShortLink(requestParam));
+    }
+
+    /**
+     *  短链接分组数量查询
+     * @return
+     */
+    @GetMapping("/api/short-link/v1/count")
+    public Result<List<ShortLinkCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParam) {
+        return Results.success(shortLinkService.listGroupShortLinkCount(requestParam));
     }
 }
