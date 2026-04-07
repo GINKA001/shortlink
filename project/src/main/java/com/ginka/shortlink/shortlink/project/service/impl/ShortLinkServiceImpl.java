@@ -88,6 +88,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         IPage<ShortLinkDO> page0 = baseMapper.selectPage(requestParam, eq);
         //将查询的DO转化为响应参数
         IPage<ShortLinkPageRespDTO> convert1 = page0.convert(item -> BeanUtil.toBean(item, ShortLinkPageRespDTO.class));
+        //完善返回的域名 convert 相当于forEach 对每一个元素进行转换
         return convert1.convert(item -> {
             ShortLinkPageRespDTO bean = BeanUtil.toBean(item, ShortLinkPageRespDTO.class);
             bean.setDomain("https://"+bean.getDomain());
