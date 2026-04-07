@@ -10,7 +10,10 @@ import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +44,7 @@ public class LinkController {
 
     /**
      * 分页查询短链接
-     * @param requestParam 分页参数0
+     * @param requestParam 分页参数
      * @return  分页查询结果
      */
     @GetMapping("/api/short-link/v1/list")
@@ -56,5 +59,13 @@ public class LinkController {
     @GetMapping("/api/short-link/v1/count")
     public Result<List<ShortLinkCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParam) {
         return Results.success(shortLinkService.listGroupShortLinkCount(requestParam));
+    }
+
+    /**
+     * 短链接跳转
+     */
+    @GetMapping("{short-uri}")
+    public void restoreUrl(@PathVariable("short-uri") String shortUri, ServletRequest request, ServletResponse response) {
+        shortLinkService.restoreUrl(shortUri, request, response);
     }
 }

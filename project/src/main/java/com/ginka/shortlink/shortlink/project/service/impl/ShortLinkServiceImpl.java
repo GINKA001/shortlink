@@ -11,7 +11,9 @@ import com.ginka.shortlink.shortlink.project.common.convention.exception.ClientE
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ServiceException;
 import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
+import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkGotoDO;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
+import com.ginka.shortlink.shortlink.project.dao.mapper.ShortLinkGotoMapper;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -20,7 +22,11 @@ import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
 import com.ginka.shortlink.shortlink.project.toolkit.HashUtil;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
@@ -36,6 +42,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> implements ShortLinkService {
     private final RBloomFilter<String> rBloomFilterConfiguration;
+    private final ShortLinkGotoMapper shortLinkGotoMapper;
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
         //生成后缀
@@ -45,13 +52,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         shortLinkDO.setEnableStatus(0);
         // 拼接完整短链接
         shortLinkDO.setFullShortUrl(requestParam.getDomain()+"/"+shortLinkSuffix);
-
+        ShortLinkGotoDO build = ShortLinkGotoDO.builder()
+                .fullShortUrl(shortLinkDO.getFullShortUrl())
+                .gid(requestParam.getGid())
+                .build();
+        shortLinkGotoMapper.insert(build);
         //布隆过滤器后防止漏判
         try {
             baseMapper.insert(shortLinkDO);
         }catch (DuplicateKeyException e){
             //todo 对误判的短链接怎么处理 1.存在于缓存 2.不存在于缓存 存在则抛异常 不存在则将其添加到布隆过滤器之中
-            LambdaQueryWrapper<ShortLinkDO> eq = Wrappers.lambdaQuery(ShortLinkDO.class).eq(ShortLinkDO::getFullShortUrl, shortLinkDO.getFullShortUrl());
+            LambdaQueryWrapper<ShortLinkDO> eq = Wrappers.lambdaQuery(ShortLinkDO.class)
+                    .eq(ShortLinkDO::getFullShortUrl, shortLinkDO.getFullShortUrl());
             ShortLinkDO shortLinkDO1 = baseMapper.selectOne(eq);
             if(shortLinkDO1!=null) {
                 log.warn("短链接: {} 重复入库", shortLinkDO.getFullShortUrl());
@@ -60,7 +72,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         }
         rBloomFilterConfiguration.add(shortLinkDO.getFullShortUrl());
         return ShortLinkCreateRespDTO.builder()
-                .fullShortUrl(shortLinkDO.getFullShortUrl())
+                .fullShortUrl("https://"+shortLinkDO.getFullShortUrl())
                 .originUrl(requestParam.getOriginUrl())
                 .gid(requestParam.getGid())
                 .build();
@@ -76,7 +88,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         IPage<ShortLinkDO> page0 = baseMapper.selectPage(requestParam, eq);
         //将查询的DO转化为响应参数
         IPage<ShortLinkPageRespDTO> convert1 = page0.convert(item -> BeanUtil.toBean(item, ShortLinkPageRespDTO.class));
-        return convert1;
+        return convert1.convert(item -> {
+            ShortLinkPageRespDTO bean = BeanUtil.toBean(item, ShortLinkPageRespDTO.class);
+            bean.setDomain("https://"+bean.getDomain());
+            return bean;
+        });
     }
 
     @Override
@@ -124,10 +140,34 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                 .clickNum(shortLinkDO.getClickNum())
                 .createTime(shortLinkDO.getCreateTime())
                 .build();
-        ShortLinkDO.ShortLinkDOBuilder shortLinkDOBuilder = ShortLinkDO.builder().delFlag(1);
-        baseMapper.update(shortLinkDOBuilder.build(), eq);
+        baseMapper.delete(eq);
         baseMapper.insert(build1);
 
+    }
+
+    @SneakyThrows
+    @Override
+    public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
+        String fullShortUrl = request.getServerName() + "/" + shortUri;
+        //用户传进来短链接 没有短链接gid信息 无法匹配分表键 用路由表来解决这一问题
+        //具体实现为创建 一个新表 存shorturi 与 gid 拿到对应的gid 在通过gid查询原网址
+        LambdaQueryWrapper<ShortLinkGotoDO> shortLinkGotoDOLambdaQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
+                .eq(ShortLinkGotoDO::getFullShortUrl, fullShortUrl);
+        ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(shortLinkGotoDOLambdaQueryWrapper);
+        if(shortLinkGotoDO==null){
+            return;
+        }
+        LambdaQueryWrapper<ShortLinkDO> eq = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, shortLinkGotoDO.getGid())
+                .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
+                .eq(ShortLinkDO::getEnableStatus, 0)
+                .eq(ShortLinkDO::getDelFlag, 0);
+        ShortLinkDO shortLinkDO = baseMapper.selectOne(eq);
+        if(shortLinkDO!=null){
+            ((HttpServletResponse)response).sendRedirect(shortLinkDO.getOriginUrl());
+        }
+
+        if (rBloomFilterConfiguration.contains(fullShortUrl)){}
     }
 
     // 生成短链接后缀  添加布隆过滤器 避免缓存穿透
