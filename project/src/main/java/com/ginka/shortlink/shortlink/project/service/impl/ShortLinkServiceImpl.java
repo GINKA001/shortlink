@@ -30,6 +30,9 @@ import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -38,6 +41,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -52,12 +58,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
     @Override
-    public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
+    public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException {
         //生成后缀
         String shortLinkSuffix = generateSuffix(requestParam);
         ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
         shortLinkDO.setShortUri(shortLinkSuffix);
         shortLinkDO.setEnableStatus(0);
+        shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
         // 拼接完整短链接
         shortLinkDO.setFullShortUrl(requestParam.getDomain()+"/"+shortLinkSuffix);
         ShortLinkGotoDO build = ShortLinkGotoDO.builder()
@@ -241,5 +248,31 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             customGenerateCount++;
         }
         return shortUri;
+    }
+    private String getFavicon(String url) throws IOException {
+        URL targetUrl = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+        connection.setInstanceFollowRedirects(false);
+        connection.setRequestMethod("GET");
+        connection.connect();
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+            String redirectUrl = connection.getHeaderField("Location");
+            if (redirectUrl != null) {
+                URL newUrl = new URL(redirectUrl);
+                connection = (HttpURLConnection) newUrl.openConnection();
+                connection.setRequestMethod("GET");
+                connection.connect();
+                responseCode = connection.getResponseCode();
+            }
+        }
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            Document document = Jsoup.connect(url).get();
+            Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon]").first();
+            if (faviconLink != null) {
+                return faviconLink.attr("abs:href");
+            }
+        }
+        return null;
     }
 }

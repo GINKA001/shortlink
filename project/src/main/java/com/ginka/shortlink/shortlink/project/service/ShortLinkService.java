@@ -12,6 +12,7 @@ import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ShortLinkService extends IService<ShortLinkDO> {
@@ -20,7 +21,7 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @param requestParam 创建链接请求参数
      * @return 创建链接响应参数
      */
-    ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam);
+    ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException;
 
     /**
      * 分页查询短链接
