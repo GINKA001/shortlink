@@ -16,5 +16,9 @@ spring:
       database: 0
       timeout: 10000ms
       connect-timeout: 10000ms
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .html
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml

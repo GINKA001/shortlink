@@ -38,6 +38,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -79,7 +80,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         }
         //缓存预热
         stringRedisTemplate.opsForValue()
-                .set(String.format(RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY, shortLinkDO.getFullShortUrl()),
+                .set(String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, shortLinkDO.getFullShortUrl()),
                         requestParam.getOriginUrl(),
                         LinkUtil.getLinkCacheValidTime(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
         rBloomFilterConfiguration.add(shortLinkDO.getFullShortUrl());
@@ -170,6 +171,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         }
         boolean contains = rBloomFilterConfiguration.contains(fullShortUrl);
         if(!contains){
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
@@ -192,6 +194,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(shortLinkGotoDOLambdaQueryWrapper);
             if (shortLinkGotoDO == null) {
                 stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-",30L, TimeUnit.MINUTES);
+                ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
             LambdaQueryWrapper<ShortLinkDO> eq = Wrappers.lambdaQuery(ShortLinkDO.class)
@@ -201,8 +204,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                     .eq(ShortLinkDO::getDelFlag, 0);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(eq);
             if (shortLinkDO != null) {
-                if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().getTime() < System.currentTimeMillis()){
+                if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())){
                     stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-",30L, TimeUnit.MINUTES);
+                    ((HttpServletResponse) response).sendRedirect("/page/notfound");
                     return;
                 }
                 stringRedisTemplate.opsForValue().set(
