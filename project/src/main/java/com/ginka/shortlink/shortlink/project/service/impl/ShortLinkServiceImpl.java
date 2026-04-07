@@ -23,6 +23,7 @@ import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
 import com.ginka.shortlink.shortlink.project.toolkit.HashUtil;
+import com.ginka.shortlink.shortlink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -78,6 +79,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                 throw new ServiceException("短链接已存在");
             }
         }
+        //缓存预热
+        stringRedisTemplate.opsForValue().set(shortLinkDO.getFullShortUrl(),requestParam.getOriginUrl(), LinkUtil.getLinkCacheValidTime(requestParam.getValidDate()), TimeUnit.DAYS);
         rBloomFilterConfiguration.add(shortLinkDO.getFullShortUrl());
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl("https://"+shortLinkDO.getFullShortUrl())
