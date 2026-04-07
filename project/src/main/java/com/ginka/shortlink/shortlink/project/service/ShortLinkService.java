@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -31,4 +32,11 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @return 短链接数量
      */
     List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam);
+
+    /**
+     * 更新短链接
+     * @param requestParam 更新参数
+     * @return 更新结果
+     */
+    void updateShortLink(ShortLinkUpdateReqDTO requestParam);
 }

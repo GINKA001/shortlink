@@ -5,6 +5,7 @@ import com.ginka.shortlink.shortlink.project.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -25,6 +26,17 @@ public class LinkController {
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return Results.success(shortLinkService.createShortLink(requestParam));
+    }
+
+    /**
+     * 修改短链接
+     * @param requestParam
+     * @return
+     */
+    @PostMapping("/api/short-link/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+        shortLinkService.updateShortLink(requestParam);
+        return Results.success();
     }
 
     /**

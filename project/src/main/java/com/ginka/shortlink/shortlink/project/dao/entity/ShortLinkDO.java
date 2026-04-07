@@ -12,7 +12,9 @@ import java.util.Date;
 
 @TableName("t_link")
 @Data
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ShortLinkDO {
 
     /**

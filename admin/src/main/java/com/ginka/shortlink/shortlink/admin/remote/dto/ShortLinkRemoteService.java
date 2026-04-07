@@ -9,13 +9,11 @@ import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,5 +56,8 @@ public interface ShortLinkRemoteService {
         param.put("requestParam", requestParam);
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/count", param);
         return JSON.parseObject(s, new TypeReference<Result<List<ShortLinkCountQueryRespDTO>>>(){});
+    }
+    default void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        String s = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update",JSON.toJSONString(requestParam));
     }
 }

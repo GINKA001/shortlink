@@ -3,15 +3,18 @@ package com.ginka.shortlink.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ServiceException;
+import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -22,9 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -77,6 +82,52 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     @Override
     public List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
        return baseMapper.listGroupShortLinkCount(requestParam);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        LambdaUpdateWrapper<ShortLinkDO> eq = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, requestParam.getOriginGid())
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getDelFlag, 0)
+                .eq(ShortLinkDO::getEnableStatus, 0)
+                .set(Objects.equals(requestParam.getValidDateType(), VailDateTypeEnum.PERMANENT.getType()), ShortLinkDO::getValidDate, null);
+        ShortLinkDO shortLinkDO = baseMapper.selectOne(eq);
+        if(shortLinkDO==null){
+            throw new ServiceException("短链接不存在或短链接失效");
+        }
+        ShortLinkDO build = ShortLinkDO.builder().originUrl(requestParam.getOriginUrl())
+                .gid(requestParam.getGid())
+                .fullShortUrl(requestParam.getFullShortUrl())
+                .validDate(requestParam.getValidDate())
+                .validDateType(requestParam.getValidDateType())
+                .describe(requestParam.getDescribe())
+                .build();
+        if(requestParam.getGid().equals(requestParam.getOriginGid())){
+            baseMapper.update(build, eq);
+            //rBloomFilterConfiguration.add(requestParam.getFullShortUrl());
+            return;
+        }
+        //在gid改变的情况下 删除原来的短链接 拼接查出来的短链接与传进来的修改参数 把新创建的短链接重新插入到数据库中
+        ShortLinkDO build1 = ShortLinkDO.builder().id(shortLinkDO.getId())
+                .fullShortUrl(requestParam.getFullShortUrl())
+                .validDateType(requestParam.getValidDateType())
+                .createdType(shortLinkDO.getCreatedType())
+                .validDate(requestParam.getValidDate())
+                .describe(requestParam.getDescribe())
+                .gid(requestParam.getGid())
+                .domain(shortLinkDO.getDomain())
+                .originUrl(requestParam.getOriginUrl())
+                .shortUri(shortLinkDO.getShortUri())
+                .favicon(shortLinkDO.getFavicon())
+                .enableStatus(shortLinkDO.getEnableStatus())
+                .clickNum(shortLinkDO.getClickNum())
+                .createTime(shortLinkDO.getCreateTime())
+                .build();
+        ShortLinkDO.ShortLinkDOBuilder shortLinkDOBuilder = ShortLinkDO.builder().delFlag(1);
+        baseMapper.update(shortLinkDOBuilder.build(), eq);
+        baseMapper.insert(build1);
+
     }
 
     // 生成短链接后缀  添加布隆过滤器 避免缓存穿透
