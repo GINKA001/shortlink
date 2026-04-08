@@ -75,10 +75,11 @@ public interface ShortLinkRemoteService {
         return JSON.parseObject(s, new TypeReference<Result<IPage<ShortLinkPageRespDTO>>>(){});
     }
     default Result<Void> recoverRecycleBin(RecycleBinRecoverReqDTO requestParam){
-        Map<String, Object> param = new HashMap<>();
-        param.put("gid", requestParam.getGid());
-        param.put("fullShortUrl", requestParam.getFullShortUrl());
         String s = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/recover",JSON.toJSONString(requestParam));
         return JSON.parseObject(s, new TypeReference<Result<Void>>(){});
+    }
+
+    default void removeRecycleBin(RecycleBinDeleteReqDTO requestParam){
+        HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/remove",JSON.toJSONString(requestParam));
     }
 }

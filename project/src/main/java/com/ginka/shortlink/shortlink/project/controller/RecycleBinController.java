@@ -3,10 +3,7 @@ package com.ginka.shortlink.shortlink.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Results;
-import com.ginka.shortlink.shortlink.project.dto.req.RecycleBinRecoverReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.RecycleBinSaveReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.*;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +36,11 @@ public class RecycleBinController {
     @PostMapping("/api/short-link/v1/recycle-bin/recover")
     public Result<Void> recoverRecycleBin(@RequestBody RecycleBinRecoverReqDTO requestParam){
         recycleBinService.recoverRecycleBin(requestParam);
+        return Results.success();
+    }
+    @PostMapping("/api/short-link/v1/recycle-bin/remove")
+    public Result<Void> removeRecycleBin(@RequestBody RecycleBinDeleteReqDTO requestParam){
+        recycleBinService.removeRecycleBin(requestParam);
         return Results.success();
     }
 

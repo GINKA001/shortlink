@@ -9,15 +9,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.project.common.constant.RedisKeyConstant;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
-import com.ginka.shortlink.shortlink.project.dto.req.RecycleBinRecoverReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.RecycleBinSaveReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.req.*;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.project.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.awt.image.WritableRaster;
 
 @Service
 @RequiredArgsConstructor
@@ -58,5 +57,15 @@ public class RecycleBinServiceImpl extends ServiceImpl<LinkMapper,ShortLinkDO> i
                 .eq(ShortLinkDO::getDelFlag, 0);
         baseMapper.update(ShortLinkDO.builder().enableStatus(0).build(), updateWrapper);
         stringRedisTemplate.delete(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+    }
+
+    @Override
+    public void removeRecycleBin(RecycleBinDeleteReqDTO requestParam) {
+        LambdaQueryWrapper<ShortLinkDO> eq = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getEnableStatus, 1)
+                .eq(ShortLinkDO::getDelFlag, 0);
+        baseMapper.delete(eq);
     }
 }
