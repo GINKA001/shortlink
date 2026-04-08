@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.admin.common.convention.exception.RemoteException;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
+import com.ginka.shortlink.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
@@ -64,5 +65,8 @@ public interface ShortLinkRemoteService {
     default Result<String> getTitleByUrl(String url ) {
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url="+url);
         return  JSON.parseObject(s, new TypeReference<Result<String>>(){});
+    }
+    default void saveRecycleBin(RecycleBinSaveReqDTO requestParam) {
+        HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/save",JSON.toJSONString(requestParam));
     }
 }
