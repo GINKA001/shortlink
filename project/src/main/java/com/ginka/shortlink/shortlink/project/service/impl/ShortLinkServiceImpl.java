@@ -57,6 +57,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
@@ -70,6 +71,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final LinkLocalStatsMapper linkLocalStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
+    private final LinkAccessLogsMapper linkAccessLogsMapper;
 
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
@@ -247,19 +249,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         //用cookie来判断使用的用户数
         AtomicBoolean isNew = new AtomicBoolean();
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+        AtomicReference<String> uv= new AtomicReference<>(); //唯一标识
         Runnable addResponseCookie = ()->{
-            String uuid = UUID.fastUUID().toString();
-            Cookie cookie = new Cookie("pv", uuid);
+            uv.set(UUID.fastUUID().toString());
+            Cookie cookie = new Cookie("pv", uv.get());
             cookie.setMaxAge(60 * 60 * 24 * 30);
             cookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("/"), fullShortUrl.length()));
             ((HttpServletResponse)response).addCookie(cookie);
             isNew.set(Boolean.TRUE);
-            stringRedisTemplate.opsForSet().add("short-link:status:uv:" + fullShortUrl + uuid);
+            stringRedisTemplate.opsForSet().add("short-link:status:uv:" + fullShortUrl + uv.get());
         };
         if (ArrayUtil.isNotEmpty( cookies)){
             Arrays.stream(cookies).filter(each-> Objects.equals(each.getName(), "uv")).findFirst().map(Cookie::getValue)
                     .ifPresentOrElse(item->
                     {
+                        uv.set(item);
                         Long add = stringRedisTemplate.opsForSet().add("short-link:status:uv:" + fullShortUrl + item);
                         isNew.set(add!=null && add>0L);
                     }, addResponseCookie);
@@ -309,22 +313,34 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                     .adCode(unknownFlag?"未知":jsonObject.getString("adcode"))
                     .build();
             linkLocalStatsMapper.shortLinkLocaleState(linkLocalStatsDO);
+            String os = LinkUtil.getOs((HttpServletRequest)request);
             LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
                     .gid( gid)
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
-                    .os(LinkUtil.getOs((HttpServletRequest)request))
+                    .os(os)
                     .date(new Date())
                     .build();
             linkOsStatsMapper.shortLinkOsStats(linkOsStatsDO);
+            String  browser=LinkUtil.getBrowser(((HttpServletRequest) request));
             LinkBrowserStatsDO linkBrowserStatsDO = LinkBrowserStatsDO.builder()
-                    .browser(LinkUtil.getBrowser(((HttpServletRequest) request)))
+                    .browser(browser)
                     .cnt(1)
                     .gid(gid)
                     .fullShortUrl(fullShortUrl)
                     .date(new Date())
                     .build();
             linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDO);
+
+            LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
+                    .ip(remoteAddr)
+                    .browser(browser)
+                    .os(os)
+                    .gid(gid)
+                    .fullShortUrl(fullShortUrl)
+                    .user(uv.get())
+                    .build();
+            linkAccessLogsMapper.insert(linkAccessLogsDO);
         }
 
 
