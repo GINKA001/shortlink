@@ -6,19 +6,25 @@ import cn.hutool.core.date.Week;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ginka.shortlink.shortlink.project.common.constant.RedisKeyConstant;
+import com.ginka.shortlink.shortlink.project.common.constant.ShortLinkConstant;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ServiceException;
 import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
 import com.ginka.shortlink.shortlink.project.dao.entity.LinkAccessStatsDO;
+import com.ginka.shortlink.shortlink.project.dao.entity.LinkLocalStatsDO;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkGotoDO;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkAccessStatsMapper;
+import com.ginka.shortlink.shortlink.project.dao.mapper.LinkLocalStatsMapper;
 import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
 import com.ginka.shortlink.shortlink.project.dao.mapper.ShortLinkGotoMapper;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
@@ -45,6 +51,7 @@ import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -53,10 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -69,6 +73,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
+    private final LinkLocalStatsMapper linkLocalStatsMapper;
+
+    @Value("${short-link.stats.local.amap-key}")
+    private String statsLocalamapKey;
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException {
         //生成后缀
@@ -285,6 +293,28 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                 .gid(gid)
                 .build();
         linkAccessStatsMapper.shortLinkStats(build);
+        Map<String, Object> localParamMap = new HashMap<>();
+        localParamMap.put("key",statsLocalamapKey);
+        localParamMap.put("ip", remoteAddr);
+        String s = HttpUtil.get(ShortLinkConstant.AMAP_REMOTE_URL, localParamMap);
+        JSONObject jsonObject = JSON.parseObject(s);
+        String infoCode = jsonObject.getString("infocode");
+        LinkLocalStatsDO linkLocalStatsDO;
+        if(StrUtil.isNotBlank(infoCode)&& infoCode.equals("10000")){
+            String province = jsonObject.getString("province");
+            boolean unknownFlag=StrUtil.equals(province,"[]");
+            linkLocalStatsDO = LinkLocalStatsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .date(new Date())
+                    .cnt(1)
+                    .country("中国")
+                    .province(unknownFlag?"未知" : province)
+                    .city(unknownFlag?"未知":jsonObject.getString("city"))
+                    .adCode(unknownFlag?"未知":jsonObject.getString("adcode"))
+                    .build();
+            linkLocalStatsMapper.shortLinkLocaleState(linkLocalStatsDO);
+        }
+
 
     }
 

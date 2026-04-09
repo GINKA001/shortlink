@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 /**
  * 访问统计Mapper
  * 短链接基础访问持久层
- * @author ginka
+ * @author ginka //gid不用管功能正常实现 编译器问题
  */
 @Mapper
 public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
