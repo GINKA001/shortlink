@@ -14,11 +14,15 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @TableName("t_link_locale_stats")
-public class LinkLocalStatsDO extends BaseDO {
+public class LinkLocaleStatsDO extends BaseDO {
         /**
          * ID
          */
         private Long id;
+        /**
+         * 短链接 gid
+         */
+        private String gid;
 
         /**
          * 完整短链接

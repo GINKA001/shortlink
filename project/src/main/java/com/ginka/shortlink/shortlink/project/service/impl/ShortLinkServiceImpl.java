@@ -68,7 +68,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
-    private final LinkLocalStatsMapper linkLocalStatsMapper;
+    private final LinkLocaleStatsMapper linkLocaleStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
     private final LinkAccessLogsMapper linkAccessLogsMapper;
@@ -301,20 +301,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         String s = HttpUtil.get(ShortLinkConstant.AMAP_REMOTE_URL, localParamMap);
         JSONObject jsonObject = JSON.parseObject(s);
         String infoCode = jsonObject.getString("infocode");
-        LinkLocalStatsDO linkLocalStatsDO;
+        LinkLocaleStatsDO linkLocaleStatsDO;
         if(StrUtil.isNotBlank(infoCode)&& infoCode.equals("10000")){
             String province = jsonObject.getString("province");
             boolean unknownFlag=StrUtil.equals(province,"[]");
-            linkLocalStatsDO = LinkLocalStatsDO.builder()
+            linkLocaleStatsDO = LinkLocaleStatsDO.builder()
                     .fullShortUrl(fullShortUrl)
                     .date(new Date())
+                    .gid(gid)
                     .cnt(1)
                     .country("中国")
                     .province(unknownFlag?"未知" : province)
                     .city(unknownFlag?"未知":jsonObject.getString("city"))
                     .adCode(unknownFlag?"未知":jsonObject.getString("adcode"))
                     .build();
-            linkLocalStatsMapper.shortLinkLocaleState(linkLocalStatsDO);
+            linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDO);
             String os = LinkUtil.getOs((HttpServletRequest)request);
             LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
                     .gid( gid)
