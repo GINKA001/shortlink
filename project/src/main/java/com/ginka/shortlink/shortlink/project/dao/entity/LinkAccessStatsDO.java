@@ -3,35 +3,27 @@ package com.ginka.shortlink.shortlink.project.dao.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-
-@TableName("t_link")
 @Data
+@TableName("t_link_access_stats")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ShortLinkDO {
-
-
+public class LinkAccessStatsDO {
     /**
-     * id
+     * 短链接id
      */
     private Long id;
-
     /**
-     * 域名
+     * 分组标识
      */
-    private String domain;
-
-    /**
-     * 短链接
-     */
-    private String shortUri;
+    private String gid;
 
     /**
      * 完整短链接
@@ -39,45 +31,34 @@ public class ShortLinkDO {
     private String fullShortUrl;
 
     /**
-     * 原始链接
+     * 统计日期
      */
-    private String originUrl;
+    private Date date;
 
     /**
-     * 点击量
+     * 访问量（PV）
      */
-    private Integer clickNum;
+    private Integer pv;
 
     /**
-     * 分组标识
+     * 独立访客数（UV）
      */
-    private String gid;
+    private Integer uv;
 
     /**
-     * 启用标识 0：未启用 1：已启用
+     * 独立IP数
      */
-    private Integer enableStatus;
+    private Integer uip;
 
     /**
-     * 创建类型 0：控制台 1：接口
+     * 小时维度
      */
-    private Integer createdType;
+    private Integer hour;
 
     /**
-     * 有效期类型 0：永久有效 1：用户自定义
+     * 星期维度
      */
-    private Integer validDateType;
-
-    /**
-     * 有效期
-     */
-    private Date validDate;
-
-    /**
-     * 描述
-     */
-    @TableField("`describe`")
-    private String describe;
+    private Integer weekday;
 
     /**
      * 创建时间
@@ -92,12 +73,8 @@ public class ShortLinkDO {
     private Date updateTime;
 
     /**
-     * 删除标识 0：未删除 1：已删除
+     * 删除标识：0-未删除，1-已删除（逻辑删除）
      */
     @TableField(fill = FieldFill.INSERT)
     private Integer delFlag;
-    /**
-     *  favicon 网站图标
-     */
-    private String favicon;
 }
