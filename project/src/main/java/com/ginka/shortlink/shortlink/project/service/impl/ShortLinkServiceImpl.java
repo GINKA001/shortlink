@@ -19,14 +19,8 @@ import com.ginka.shortlink.shortlink.project.common.constant.ShortLinkConstant;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ServiceException;
 import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
-import com.ginka.shortlink.shortlink.project.dao.entity.LinkAccessStatsDO;
-import com.ginka.shortlink.shortlink.project.dao.entity.LinkLocalStatsDO;
-import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
-import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkGotoDO;
-import com.ginka.shortlink.shortlink.project.dao.mapper.LinkAccessStatsMapper;
-import com.ginka.shortlink.shortlink.project.dao.mapper.LinkLocalStatsMapper;
-import com.ginka.shortlink.shortlink.project.dao.mapper.LinkMapper;
-import com.ginka.shortlink.shortlink.project.dao.mapper.ShortLinkGotoMapper;
+import com.ginka.shortlink.shortlink.project.dao.entity.*;
+import com.ginka.shortlink.shortlink.project.dao.mapper.*;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -74,6 +68,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocalStatsMapper linkLocalStatsMapper;
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
@@ -313,6 +308,14 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                     .adCode(unknownFlag?"未知":jsonObject.getString("adcode"))
                     .build();
             linkLocalStatsMapper.shortLinkLocaleState(linkLocalStatsDO);
+            LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                    .gid( gid)
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .os(LinkUtil.getOs((HttpServletRequest)request))
+                    .date(new Date())
+                    .build();
+            linkOsStatsMapper.shortLinkOsStats(linkOsStatsDO);
         }
 
 
