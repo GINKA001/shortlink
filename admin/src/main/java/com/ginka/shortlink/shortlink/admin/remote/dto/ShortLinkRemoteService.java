@@ -9,10 +9,7 @@ import com.ginka.shortlink.shortlink.admin.common.convention.exception.RemoteExc
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.*;
-import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
-import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
-import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
+import com.ginka.shortlink.shortlink.admin.remote.dto.resp.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -87,4 +84,11 @@ public interface ShortLinkRemoteService {
     default Result<ShortLinkStatsRespDTO> oneShortLinkStats(ShortLinkStatsReqDTO requestParam) {
         String resultBodyStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats", BeanUtil.beanToMap(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>(){});}
+    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record",stringObjectMap);
+        return JSON.parseObject(s, new TypeReference<>(){});
+    }
 }
