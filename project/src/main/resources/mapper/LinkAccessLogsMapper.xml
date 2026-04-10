@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ginka.shortlink.shortlink.project.dao.mapper.LinkAccessLogsMapper">
+
+    <!-- 2. 根据用户列表查询其访问状态类型 -->
+    <select id="selectUvTypeByUsers" resultType="map">
+        SELECT
+        user,
+        CASE
+        WHEN MIN(create_time) BETWEEN #{param.startDate} AND #{param.endDate} THEN '新访客'
+        ELSE '老访客'
+        END AS uvType
+        FROM
+        t_link_access_logs
+        WHERE
+        full_short_url = #{param.fullShortUrl}
+        AND gid = #{param.gid}
+        AND user IN
+        <foreach collection="userAccessLogsList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY
+        user
+    </select>
+</mapper>

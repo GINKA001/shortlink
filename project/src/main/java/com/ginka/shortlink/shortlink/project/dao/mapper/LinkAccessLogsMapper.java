@@ -57,24 +57,6 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
             ") AS user_counts;")
     HashMap<String, Object> findUvTypeCntByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
 
-    @Select(
-            "SELECT " +
-            "    user, " +
-            "    CASE " +
-            "        WHEN MIN(create_time) BETWEEN #{startDate} AND #{endDate} THEN '新访客' " +
-            "        ELSE '老访客' " +
-            "    END AS uvType " +
-            "FROM " +
-            "    t_link_access_logs " +
-            "WHERE " +
-            "    full_short_url = #{fullShortUrl} " +
-            "    AND gid = #{gid} " +
-            "    AND user in " +
-            "    <foreach item='item' index='index' collection='userAccessLogsList' open='(' separator=',' close=')'> " +
-            "        #{item} " +
-            "    </foreach> " +
-            "GROUP BY " +
-            "    user;"
-    )
+
     List<Map<String, Object>> selectUvTypeByUsers(@Param("param") ShortLinkStatusChongGouReqDTO requestParam, @Param("userAccessLogsList")List<String> list);
 }
