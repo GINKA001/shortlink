@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ginka.shortlink.shortlink.project.dao.entity.LinkAccessLogsDO;
+import com.ginka.shortlink.shortlink.project.dao.entity.LinkAccessStatsDO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatusChongGouReqDTO;
@@ -59,4 +60,13 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
 
 
     List<Map<String, Object>> selectUvTypeByUsers(@Param("param") ShortLinkStatusChongGouReqDTO requestParam, @Param("userAccessLogsList")List<String> list);
+
+    /**
+     * 根据短链接获取指定日期内的pv uv uip
+     * @param requestParam 请求参数
+     * @return 访问数据
+     */
+    @Select(" SELECT full_short_url, gid, COUNT(user) AS pv, COUNT(DISTINCT user) AS uv, COUNT(DISTINCT ip) AS uip FROM t_link_access_logs WHERE full_short_url = #{param.fullShortUrl} AND gid = #{param.gid} AND create_time BETWEEN #{param.startDate} AND #{param.endDate} GROUP BY full_short_url, gid;"
+    )
+    LinkAccessStatsDO findPvUvUipStatusByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
 }
