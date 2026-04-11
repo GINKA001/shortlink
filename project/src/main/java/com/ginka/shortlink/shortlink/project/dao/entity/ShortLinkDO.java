@@ -100,4 +100,8 @@ public class ShortLinkDO {
      *  favicon 网站图标
      */
     private String favicon;
+
+    private Integer totalPv;
+    private Integer totalUv;
+    private Integer totalUip;
 }
