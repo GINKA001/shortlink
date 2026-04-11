@@ -100,8 +100,10 @@ public class ShortLinkDO {
      *  favicon 网站图标
      */
     private String favicon;
-
+    @TableField(exist = false)//逻辑字段 不存在于表中
     private Integer totalPv;
+    @TableField(exist = false)
     private Integer totalUv;
+    @TableField(exist = false)
     private Integer totalUip;
 }

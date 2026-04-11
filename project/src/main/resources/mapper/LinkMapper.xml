@@ -15,4 +15,36 @@
     </foreach>
     GROUP BY gid
     </select>
+    <select id="pageLink" parameterType="com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO" resultType="com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO">
+        select * from t.*,
+        COALESCE(s.today_pv, 0) AS todayPv,
+        COALESCE(s.today_uv, 0) AS todayUv,
+        COALESCE(s.today_uip, 0) AS todayUip
+    from t_link t
+    left join t_link_statistics s on t.id = s.link_id and t.full_short_url = s.full_short_url and s.date = CURDATE()
+        where t.gid=#{gid} and t.enable_status=0 and t.del_flag=0
+        <choose>
+            <when test="orderTag == 'totalPv'">
+                order by t.total_pv desc
+            </when>
+            <when test="orderTag == 'totalUv'">
+                order by t.total_uv desc
+            </when>
+            <when test="orderTag == 'totalUip'">
+                order by t.total_uip desc
+            </when>
+            <when test="orderTag==todayPv">
+                order by todayPv desc
+            </when>
+            <when test="orderTag==todayUv">
+                order by todayUv desc
+            </when>
+            <when test="orderTag==todayUip">
+                order by todayUip desc
+            </when>
+            <otherwise>
+                order by create_time desc
+            </otherwise>
+        </choose>
+    </select>
 </mapper>

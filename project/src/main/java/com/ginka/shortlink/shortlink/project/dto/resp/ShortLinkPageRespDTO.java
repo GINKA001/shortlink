@@ -85,7 +85,7 @@ public class ShortLinkPageRespDTO {
     private Integer totalPv;
     private Integer totalUv;
     private Integer totalUip;
-    private Integer toDayPv;
-    private Integer toDayUv;
-    private Integer toDayUip;
+    private Integer todayPv;
+    private Integer todayUv;
+    private Integer todayUip;
 }
