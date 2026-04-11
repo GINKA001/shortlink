@@ -54,8 +54,5 @@ public class LinkStatsTodayDO extends BaseDO {
     private Integer todayUip;
 
 
-    /**
-     * 删除标识 0：未删除 1：已删除
-     */
-    private Integer delFlag;
+
 }

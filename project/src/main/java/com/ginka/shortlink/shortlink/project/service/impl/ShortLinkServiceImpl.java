@@ -74,6 +74,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final LinkAccessLogsMapper linkAccessLogsMapper;
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
+    private final LinkStatsTodayMapper linkStatsTodayMapper;
 
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
@@ -85,6 +86,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         shortLinkDO.setShortUri(shortLinkSuffix);
         shortLinkDO.setEnableStatus(0);
         shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
+        shortLinkDO.setTotalPv(0);
+        shortLinkDO.setTotalUv(0);
+        shortLinkDO.setTotalUip(0);
         // 拼接完整短链接
         shortLinkDO.setFullShortUrl(requestParam.getDomain()+"/"+shortLinkSuffix);
         ShortLinkGotoDO build = ShortLinkGotoDO.builder()
@@ -367,9 +371,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                     .user(uv.get())
                     .build();
             linkAccessLogsMapper.insert(linkAccessLogsDO);
+
+            baseMapper.incrementStats(gid,fullShortUrl,1,isNew.get()?1:0,uipFirstFlag?1:0);
+            LinkStatsTodayDO statsTodayDO = LinkStatsTodayDO.builder().gid(gid)
+                    .fullShortUrl(fullShortUrl)
+                    .date(new Date())
+                    .todayPv(1)
+                    .todayUv(isNew.get() ? 1 : 0)
+                    .todayUip(uipFirstFlag ? 1 : 0)
+                    .build();
+            linkStatsTodayMapper.shortLinkTodayStats(statsTodayDO);
         }
-
-
     }
 
     // 生成短链接后缀  添加布隆过滤器 避免缓存穿透
