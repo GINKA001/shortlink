@@ -3,8 +3,8 @@ package com.ginka.shortlink.shortlink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
-import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkStatsReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
@@ -29,10 +29,14 @@ public class ShortLinkStatsController {
     public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {
         return shortLinkRemoteService.oneShortLinkStats(requestParam);
     }
+    @GetMapping("/api/short-link/v1/stats/group")
+    public Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+        return shortLinkRemoteService.groupShortLinkStats(requestParam);
+    }
     /**
      *访问单个短链接规定时间内访问记录
-     * @param requestParam
-     * @return
+     * @param requestParam 访问记录参数
+     * @return 访问记录
      */
     @GetMapping("/api/short-link/admin/v1/stats/access-record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {

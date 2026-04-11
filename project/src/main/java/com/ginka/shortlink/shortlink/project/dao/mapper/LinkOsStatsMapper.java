@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ginka.shortlink.shortlink.project.dao.entity.LinkOsStatsDO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -35,4 +36,16 @@ public interface LinkOsStatsMapper extends BaseMapper<LinkOsStatsDO> {
             "GROUP BY " +
             "    full_short_url, gid , os;")
     List<HashMap<String, Object>> listOsStatsByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
+
+    @Select("SELECT " +
+            "    os, " +
+            "    SUM(cnt) AS count " +
+            "FROM " +
+            "    t_link_os_stats " +
+            "WHERE " +
+            "     gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "     gid , os;")
+    List<HashMap<String, Object>> listOsStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
 }
