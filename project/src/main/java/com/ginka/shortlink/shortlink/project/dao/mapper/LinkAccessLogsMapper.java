@@ -62,6 +62,9 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
 
     List<Map<String, Object>> selectUvTypeByUsers(@Param("param") ShortLinkStatusChongGouReqDTO requestParam, @Param("userAccessLogsList")List<String> list);
 
+
+    List<Map<String, Object>> selectGroupUvTypeByUsers(@Param("param") ShortLinkStatusChongGouReqDTO requestParam, @Param("userAccessLogsList")List<String> list);
+
     /**
      * 根据短链接获取指定日期内的pv uv uip
      * @param requestParam 请求参数

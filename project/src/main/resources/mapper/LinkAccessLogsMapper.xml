@@ -23,4 +23,22 @@
         GROUP BY
         user
     </select>
+    <select id="selectGroupUvTypeByUsers" resultType="map">
+        SELECT
+        user,
+        CASE
+        WHEN MIN(create_time) BETWEEN #{param.startDate} AND #{param.endDate} THEN '新访客'
+        ELSE '老访客'
+        END AS uvType
+        FROM
+        t_link_access_logs
+        WHERE
+        gid = #{param.gid}
+        AND user IN
+        <foreach collection="userAccessLogsList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY
+        user
+    </select>
 </mapper>

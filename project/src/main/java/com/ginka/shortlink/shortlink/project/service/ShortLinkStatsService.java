@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.project.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkStatsReqDTO;
@@ -23,4 +24,6 @@ public interface ShortLinkStatsService {
 
     IPage<ShortLinkStatsAccessRecordRespDTO> oneShortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam);
     ShortLinkStatsRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam);
+
+    IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam);
 }

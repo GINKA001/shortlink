@@ -3,7 +3,9 @@ package com.ginka.shortlink.shortlink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
+import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkStatsReqDTO;
@@ -29,7 +31,7 @@ public class ShortLinkStatsController {
     public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {
         return shortLinkRemoteService.oneShortLinkStats(requestParam);
     }
-    @GetMapping("/api/short-link/v1/stats/group")
+    @GetMapping("/api/short-link/admin/v1/stats/group")
     public Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
         return shortLinkRemoteService.groupShortLinkStats(requestParam);
     }
@@ -41,5 +43,10 @@ public class ShortLinkStatsController {
     @GetMapping("/api/short-link/admin/v1/stats/access-record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         return shortLinkRemoteService.shortLinkStatsAccessRecord(requestParam);
+    }
+
+    @GetMapping("/api/short-link/admin/v1/stats/access-record/group")
+    public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return shortLinkRemoteService.shortLinkGroupStatsAccessRecord(requestParam);
     }
 }

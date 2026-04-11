@@ -95,6 +95,13 @@ public interface ShortLinkRemoteService {
 
     default Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/group", BeanUtil.beanToMap(requestParam));
-        return JSON.parseObject(s, new TypeReference<Result<ShortLinkStatsRespDTO>>() {});
+        return JSON.parseObject(s, new TypeReference<>() {});
+    }
+    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String s = HttpUtil.get("/api/short-link/v1/stats/access-record/group", stringObjectMap);
+        return JSON.parseObject(s, new TypeReference<>() {});
     }
 }
