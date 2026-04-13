@@ -91,6 +91,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     @Value("${short-link.domain.default}")
     private String domainDefault;
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException {
         verificationWhitelist(requestParam.getOriginUrl());
         //生成后缀
