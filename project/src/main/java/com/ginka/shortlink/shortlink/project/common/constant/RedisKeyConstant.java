@@ -37,4 +37,8 @@ public class RedisKeyConstant {
      * 短链接状态 UV 前缀 Key
      */
     public static final String SHORT_LINK_STATUS_UIP_KEY="short-link:status:uip:";
+
+    public static final String SHORT_LINK_STATS_STREAM_TOPIC_KEY="short_link:stats-stream";
+
+    public static final String SHORT_LINK_STATS_STREAM_GROUP_KEY="short_link:stats-stream:only-group";
 }

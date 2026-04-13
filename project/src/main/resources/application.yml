@@ -16,9 +16,7 @@ spring:
       database: 0
       timeout: 10000ms
       connect-timeout: 10000ms
-      channel-topic:
-        short-link-stats: 'short_link:stats-stream'
-        short-link-stats-group: 'short_link:stats-stream:only-group'
+
   mvc:
     view:
       prefix: /templates/
