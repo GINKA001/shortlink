@@ -664,7 +664,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
                 throw new ClientException("短链接生成失败");
             }
             shortUri = HashUtil.hashToBase62(originUrl);
-            if(!rBloomFilterConfiguration.contains(requestParam.getDomain()+"/"+shortUri)) {
+            if(!rBloomFilterConfiguration.contains(domainDefault+"/"+shortUri)) {
                 break;
             }
             originUrl+=System.currentTimeMillis();
