@@ -78,6 +78,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
 
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
+    @Value("${short-link.domain.default}")
+    private String domainDefault;
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException {
         //生成后缀
@@ -90,7 +92,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
         shortLinkDO.setTotalUv(0);
         shortLinkDO.setTotalUip(0);
         // 拼接完整短链接
-        shortLinkDO.setFullShortUrl(requestParam.getDomain()+"/"+shortLinkSuffix);
+        shortLinkDO.setFullShortUrl(domainDefault+"/"+shortLinkSuffix);
         ShortLinkGotoDO build = ShortLinkGotoDO.builder()
                 .fullShortUrl(shortLinkDO.getFullShortUrl())
                 .gid(requestParam.getGid())
@@ -189,7 +191,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
-        String fullShortUrl = request.getServerName() + "/" + shortUri;
+        String severPort = Optional.of(request.getServerPort()).filter(each -> !Objects.equals(each, 80)).map(String::valueOf).map(each -> ":" + each).orElse("");
+        String fullShortUrl = request.getServerName() + severPort + "/" + shortUri;
+
         //缓存击穿 在一个key失效后有大量的请求查询这个key
         String originLink = stringRedisTemplate.opsForValue().get(String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl));
         if(StringUtil.isNotBlank(originLink)) {
