@@ -1,5 +1,6 @@
 package com.ginka.shortlink.shortlink.project.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Results;
@@ -11,6 +12,7 @@ import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkBatchCreateRespDT
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+import com.ginka.shortlink.shortlink.project.handler.CustomBlockHandler;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -28,7 +30,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LinkController {
     private final ShortLinkService shortLinkService;
-
+    @SentinelResource(
+            value = "create_short-link",
+            blockHandler = "createShortLinkBlockHandlerMethod",
+            blockHandlerClass = CustomBlockHandler.class//默认处理规则
+    )//引入流控规则
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) throws IOException {
         return Results.success(shortLinkService.createShortLink(requestParam));
