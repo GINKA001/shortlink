@@ -92,6 +92,10 @@ public class ShortLinkDO {
     private Date updateTime;
 
     /**
+     *
+     */
+    private Long delTime;
+    /**
      * 删除标识 0：未删除 1：已删除
      */
     @TableField(fill = FieldFill.INSERT)
