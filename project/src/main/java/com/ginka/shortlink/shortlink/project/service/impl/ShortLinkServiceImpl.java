@@ -28,7 +28,6 @@ import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.*;
-import com.ginka.shortlink.shortlink.project.mq.producer.DelayShortLinkStatsProducer;
 import com.ginka.shortlink.shortlink.project.mq.producer.ShortLinkStatsSaveProducer;
 import com.ginka.shortlink.shortlink.project.service.LinkStatsTodayService;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
@@ -562,7 +561,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             if(!rBloomFilterConfiguration.contains(domainDefault+"/"+shortUri)) {
                 break;
             }
-            originUrl+=System.currentTimeMillis();
+            originUrl+=UUID.randomUUID().toString();
             customGenerateCount++;
         }
         return shortUri;
