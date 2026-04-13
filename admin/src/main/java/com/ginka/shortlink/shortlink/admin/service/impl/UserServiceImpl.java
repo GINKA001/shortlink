@@ -1,6 +1,7 @@
 package com.ginka.shortlink.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -24,7 +25,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -114,22 +114,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if(userDO==null){
             throw new ClientException("用户不存在");
         }
-        Boolean hasLogin = stringRedisTemplate.hasKey("login_"+requestParam.getUsername());
-        if(hasLogin!=null && hasLogin){
-            throw new ClientException("用户已登录");
+        Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
+        if(CollUtil.isNotEmpty(hasLoginMap)){
+            return new UserLoginRespDTO(hasLoginMap.keySet().stream().findFirst().map(Object::toString).orElseThrow(()->new ClientException("用户登录错误")));
         }
         /**
-         *
          * 生成token
          */
         String uuid = UUID.randomUUID().toString();
-        stringRedisTemplate.opsForValue().set(uuid,JSON.toJSONString(userDO),30L, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(uuid,JSON.toJSONString(userDO),30L, TimeUnit.MINUTES);
         //存储用户信息
         Map<String,Object> userInfoMap=new HashMap<>();
         userInfoMap.put("token",JSON.toJSONString(userDO));
         //
         stringRedisTemplate.opsForHash().put("login_"+requestParam.getUsername(),uuid,JSON.toJSONString(userDO));
-        stringRedisTemplate.expire("login_"+requestParam.getUsername(),30L,TimeUnit.DAYS);
+        stringRedisTemplate.expire("login_"+requestParam.getUsername(),30L,TimeUnit.MINUTES);
 
         return new UserLoginRespDTO(uuid);
     }
