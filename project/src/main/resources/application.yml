@@ -28,4 +28,11 @@ short-link:
       amap-key: 3cb92daf687cb1909f67c74b62073220
   domain:
     default: nurl.ink:8001
-
+  goto-domain:
+    enable: true
+    names: '百度,github,stackoverflow,codeforce,google'
+    details:
+      - baidu.com
+      - github.com
+      - stackoverflow.com
+      - codeforce.com

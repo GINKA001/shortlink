@@ -20,6 +20,7 @@ import com.ginka.shortlink.shortlink.project.common.constant.ShortLinkConstant;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ClientException;
 import com.ginka.shortlink.shortlink.project.common.convention.exception.ServiceException;
 import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
+import com.ginka.shortlink.shortlink.project.config.GotoDomainWhiteListConfiguration;
 import com.ginka.shortlink.shortlink.project.dao.entity.*;
 import com.ginka.shortlink.shortlink.project.dao.mapper.*;
 import com.ginka.shortlink.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
@@ -84,6 +85,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
     private final LinkStatsTodayService linkStatsTodayService;
+    private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
 
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
@@ -91,6 +93,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private String domainDefault;
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) throws IOException {
+        verificationWhitelist(requestParam.getOriginUrl());
         //生成后缀
         String shortLinkSuffix = generateSuffix(requestParam);
         ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
@@ -155,6 +158,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        verificationWhitelist(requestParam.getOriginUrl());
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                 .eq(ShortLinkDO::getGid, requestParam.getOriginGid())
                 .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
@@ -693,5 +697,19 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             }
         }
         return null;
+    }
+    private void verificationWhitelist(String originUrl) {
+        Boolean enable = gotoDomainWhiteListConfiguration.getEnable();
+        if (enable == null || !enable) {
+            return;
+        }
+        String domain = LinkUtil.extractDomain(originUrl);
+        if (StrUtil.isBlank(domain)) {
+            throw new ClientException("跳转链接填写错误");
+        }
+        List<String> details = gotoDomainWhiteListConfiguration.getDetails();
+        if (!details.contains(domain)) {
+            throw new ClientException("演示环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getNames());
+        }
     }
 }
