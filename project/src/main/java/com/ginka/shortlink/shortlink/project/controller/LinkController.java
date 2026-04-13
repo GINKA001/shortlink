@@ -3,9 +3,11 @@ package com.ginka.shortlink.shortlink.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.project.common.convention.result.Results;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -30,6 +32,13 @@ public class LinkController {
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) throws IOException {
         return Results.success(shortLinkService.createShortLink(requestParam));
+    }
+    /**
+     * 批量创建短链接
+     */
+    @PostMapping("/api/short-link/v1/create/batch")
+    public Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam) {
+        return Results.success(shortLinkService.batchCreateShortLink(requestParam));
     }
 
     /**

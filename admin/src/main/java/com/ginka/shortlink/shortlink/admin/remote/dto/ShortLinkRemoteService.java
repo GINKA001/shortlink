@@ -101,7 +101,12 @@ public interface ShortLinkRemoteService {
         Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
         stringObjectMap.remove("orders");
         stringObjectMap.remove("records");
-        String s = HttpUtil.get("/api/short-link/v1/stats/access-record/group", stringObjectMap);
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
         return JSON.parseObject(s, new TypeReference<>() {});
+    }
+
+    default Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(ShortLinkBatchCreateReqDTO requestParam) {
+        String post = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create/batch", BeanUtil.beanToMap(requestParam));
+        return JSON.parseObject(post, new TypeReference<>() {});
     }
 }

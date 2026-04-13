@@ -21,12 +21,11 @@ import com.ginka.shortlink.shortlink.project.common.convention.exception.Service
 import com.ginka.shortlink.shortlink.project.common.enums.VailDateTypeEnum;
 import com.ginka.shortlink.shortlink.project.dao.entity.*;
 import com.ginka.shortlink.shortlink.project.dao.mapper.*;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
-import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
-import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
-import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.*;
 import com.ginka.shortlink.shortlink.project.service.ShortLinkService;
 import com.ginka.shortlink.shortlink.project.toolkit.HashUtil;
 import com.ginka.shortlink.shortlink.project.toolkit.LinkUtil;
@@ -251,6 +250,35 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             lock.unlock();
         }
     }
+
+    @SneakyThrows
+    @Override
+    public ShortLinkBatchCreateRespDTO batchCreateShortLink(ShortLinkBatchCreateReqDTO requestParam) {
+        List<String> describes = requestParam.getDescribes();
+        List<String> originUrls = requestParam.getOriginUrls();
+        List<ShortLinkBaseInfoRespDTO> response = new ArrayList<>();
+        int size=originUrls.size();
+        for (int i = 0; i < size; i++){
+            ShortLinkCreateReqDTO shortLinkCreateReqDTO = BeanUtil.toBean(requestParam, ShortLinkCreateReqDTO.class);
+            shortLinkCreateReqDTO.setOriginUrl(originUrls.get(i));
+            shortLinkCreateReqDTO.setDescribe(describes.get(i));
+            try {
+                ShortLinkCreateRespDTO shortLink = createShortLink(shortLinkCreateReqDTO);
+                ShortLinkBaseInfoRespDTO shortLinkBaseInfoRespDTO = ShortLinkBaseInfoRespDTO.builder().fullShortUrl(shortLink.getFullShortUrl())
+                        .originUrl(shortLink.getOriginUrl())
+                        .describe(describes.get(i))
+                        .build();
+                response.add(shortLinkBaseInfoRespDTO);
+            }catch (Throwable e){
+                log.error("创建短链接失败 {}",originUrls.get(i));
+            }
+        }
+        return ShortLinkBatchCreateRespDTO.builder()
+                .total(response.size())
+                .baseLinkInfos( response)
+                .build();
+    }
+
     private void shortLinkStats(String fullShortUrl,String gid,ServletRequest request, ServletResponse response){
         //用cookie来判断使用的用户数
         AtomicBoolean isNew = new AtomicBoolean();

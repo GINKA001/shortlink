@@ -3,14 +3,17 @@ package com.ginka.shortlink.shortlink.project.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ginka.shortlink.shortlink.project.dao.entity.ShortLinkDO;
+import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.ginka.shortlink.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.ginka.shortlink.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,4 +53,6 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @param response 响应参数
      */
     void restoreUrl(String shortUri, ServletRequest request, ServletResponse response);
+
+    ShortLinkBatchCreateRespDTO batchCreateShortLink(ShortLinkBatchCreateReqDTO requestParam);
 }
