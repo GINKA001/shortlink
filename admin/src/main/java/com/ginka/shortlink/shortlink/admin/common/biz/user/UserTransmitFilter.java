@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.io.IOException;
+
+import static com.ginka.shortlink.shortlink.admin.common.constant.RedisCacheConstant.USER_LOGIN_KEY;
+
 @RequiredArgsConstructor //构造函数注入
 public class UserTransmitFilter implements Filter {
 
@@ -17,7 +20,7 @@ public class UserTransmitFilter implements Filter {
         HttpServletRequest request=(HttpServletRequest)servletRequest;
         String username = request.getHeader("username");
         String token=request.getHeader("token");
-        Object userInfoJsonStr = stringRedisTemplate.opsForHash().get("login_" + username, token);
+        Object userInfoJsonStr = stringRedisTemplate.opsForHash().get(USER_LOGIN_KEY + username, token);
         if (userInfoJsonStr != null) {
         //获取当前用户信息
             UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);

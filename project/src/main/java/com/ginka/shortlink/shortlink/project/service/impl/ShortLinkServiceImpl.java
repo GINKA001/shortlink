@@ -151,7 +151,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     }
 
     @Override
-    public List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
+     public List<ShortLinkCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
        return baseMapper.listGroupShortLinkCount(requestParam);
     }
     @SneakyThrows
@@ -427,21 +427,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
             cookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("/"), fullShortUrl.length()));
             ((HttpServletResponse)response).addCookie(cookie);
             isNew.set(Boolean.TRUE);
-            stringRedisTemplate.opsForSet().add("short-link:status:uv:" , fullShortUrl + uv.get());
+            stringRedisTemplate.opsForSet().add(SHORT_LINK_STATUS_UV_KEY , fullShortUrl + uv.get());
         };
         if (ArrayUtil.isNotEmpty( cookies)){
             Arrays.stream(cookies).filter(each-> Objects.equals(each.getName(), "uv")).findFirst().map(Cookie::getValue)
                     .ifPresentOrElse(item->
                     {
                         uv.set(item);
-                        Long add = stringRedisTemplate.opsForSet().add("short-link:status:uv:" + fullShortUrl , item);
+                        Long add = stringRedisTemplate.opsForSet().add(SHORT_LINK_STATUS_UV_KEY + fullShortUrl , item);
                         isNew.set(add!=null && add>0L);
                     }, addResponseCookie);
         }else {
             addResponseCookie.run();
         }
         String remoteAddr = LinkUtil.getActualIp((HttpServletRequest) request);
-        Long uipAdd = stringRedisTemplate.opsForSet().add("short-link:status:uip:" + fullShortUrl , remoteAddr);
+        Long uipAdd = stringRedisTemplate.opsForSet().add(SHORT_LINK_STATUS_UIP_KEY + fullShortUrl , remoteAddr);
         boolean uipFirstFlag = uipAdd!=null && uipAdd>0L;
         if(StrUtil.isBlank(gid)){
             LambdaQueryWrapper<ShortLinkGotoDO> shortLinkGotoDOLambdaQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
