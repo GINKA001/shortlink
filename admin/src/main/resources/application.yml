@@ -17,3 +17,6 @@ spring:
       database: 0
       timeout: 10000ms
       connect-timeout: 10000ms
+short-link:
+  group:
+    max-num: 20
