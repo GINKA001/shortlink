@@ -1,16 +1,13 @@
-package com.ginka.shortlink.shortlink.admin.remote.dto;
+package com.ginka.shortlink.shortlink.admin.remote;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.ginka.shortlink.shortlink.admin.common.convention.exception.RemoteException;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
-import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.*;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.*;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;

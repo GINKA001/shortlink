@@ -86,6 +86,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<LinkMapper, ShortLinkDO> i
     private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
 
+
     @Value("${short-link.stats.local.amap-key}")
     private String statsLocalamapKey;
     @Value("${short-link.domain.default}")

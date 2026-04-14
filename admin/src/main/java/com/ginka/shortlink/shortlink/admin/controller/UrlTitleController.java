@@ -2,8 +2,7 @@ package com.ginka.shortlink.shortlink.admin.controller;
 
 
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
-import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
-import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.ShortLinkRemoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

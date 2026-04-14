@@ -13,7 +13,7 @@ import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
-import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.ShortLinkRemoteService;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.GroupService;
 import com.ginka.shortlink.shortlink.admin.util.RandomCodeUtils;

@@ -9,7 +9,7 @@ import com.ginka.shortlink.shortlink.admin.common.convention.exception.ServiceEx
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.dao.entity.GroupDO;
 import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
-import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.ShortLinkRemoteService;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.RecycleBinService;

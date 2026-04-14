@@ -4,7 +4,7 @@ package com.ginka.shortlink.shortlink.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Result;
 import com.ginka.shortlink.shortlink.admin.common.convention.result.Results;
-import com.ginka.shortlink.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.ginka.shortlink.shortlink.admin.remote.ShortLinkRemoteService;
 import com.ginka.shortlink.shortlink.admin.remote.dto.req.*;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.RecycleBinService;
