@@ -13,6 +13,7 @@ import com.ginka.shortlink.shortlink.admin.dao.mapper.GroupMapper;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.ginka.shortlink.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
+import com.ginka.shortlink.shortlink.admin.remote.ShortLinkActualRemoteService;
 import com.ginka.shortlink.shortlink.admin.remote.ShortLinkRemoteService;
 import com.ginka.shortlink.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
 import com.ginka.shortlink.shortlink.admin.service.GroupService;
@@ -36,7 +37,7 @@ import static com.ginka.shortlink.shortlink.admin.common.constant.RedisCacheCons
 @Slf4j
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
-    ShortLinkRemoteService shortLinkRemoteService=new ShortLinkRemoteService(){};
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
     private  final RedissonClient redissonClient;
 
     @Value("${short-link.group.max-num}")
@@ -89,7 +90,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0)
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOS = baseMapper.selectList(groupDOLambdaQueryWrapper);
-        Result<List<ShortLinkCountQueryRespDTO>> listResult = shortLinkRemoteService.listGroupShortLinkCount(groupDOS.stream().map(GroupDO::getGid).toList());
+        Result<List<ShortLinkCountQueryRespDTO>> listResult = shortLinkActualRemoteService.listGroupShortLinkCount(groupDOS.stream().map(GroupDO::getGid).toList());
         List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOS = BeanUtil.copyToList(groupDOS, ShortLinkGroupRespDTO.class);
         shortLinkGroupRespDTOS.forEach(each -> {
             Optional<ShortLinkCountQueryRespDTO> first = listResult.getData().stream().filter(item-> Objects.equals(item.getGid(), each.getGid())).findFirst();

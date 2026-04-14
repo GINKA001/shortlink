@@ -35,7 +35,7 @@ public interface ShortLinkRemoteService {
                 .execute()
                 .body();
 
-        return JSON.parseObject(s, new TypeReference<Result<ShortLinkCreateRespDTO>>(){});
+        return JSON.parseObject(s, new TypeReference<>(){});
     }
     default Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         Map<String, Object> param = new HashMap<>();
@@ -56,7 +56,7 @@ public interface ShortLinkRemoteService {
         String s = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update",JSON.toJSONString(requestParam));
     }
 
-    default Result<String> getTitleByUrl(String url ) {
+    default Result<String> getTitleByUrl(String url) {
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url="+url);
         return  JSON.parseObject(s, new TypeReference<Result<String>>(){});
     }
