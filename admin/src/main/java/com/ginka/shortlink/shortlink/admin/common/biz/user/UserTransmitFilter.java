@@ -1,9 +1,12 @@
 package com.ginka.shortlink.shortlink.admin.common.biz.user;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.io.IOException;
@@ -12,25 +15,21 @@ import static com.ginka.shortlink.shortlink.admin.common.constant.RedisCacheCons
 
 @RequiredArgsConstructor //构造函数注入
 public class UserTransmitFilter implements Filter {
-
-    private final StringRedisTemplate stringRedisTemplate;
+    @SneakyThrows
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
-        HttpServletRequest request=(HttpServletRequest)servletRequest;
-        String username = request.getHeader("username");
-        String token=request.getHeader("token");
-        Object userInfoJsonStr = stringRedisTemplate.opsForHash().get(USER_LOGIN_KEY + username, token);
-        if (userInfoJsonStr != null) {
-        //获取当前用户信息
-            UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        String username = httpServletRequest.getHeader("username");
+        if (StrUtil.isNotBlank(username)) {
+            String userId = httpServletRequest.getHeader("userId");
+            String realName = httpServletRequest.getHeader("realName");
+            UserInfoDTO userInfoDTO = new UserInfoDTO(userId, username, realName);
             UserContext.setUser(userInfoDTO);
         }
         try {
             filterChain.doFilter(servletRequest, servletResponse);
-        }finally {
+        } finally {
             UserContext.removeUser();
         }
-
     }
 }
