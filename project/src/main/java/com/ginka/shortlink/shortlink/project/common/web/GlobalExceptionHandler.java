@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Optional;
 
-@Component
+@Component("globalExceptionHandlerByProject")
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

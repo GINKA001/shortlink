@@ -29,15 +29,15 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
 short-link:
   stats:
-    local:
+    locale:
       amap-key: 3cb92daf687cb1909f67c74b62073220
   domain:
     default: nurl.ink:8001
   goto-domain:
     enable: true
-    names: '百度,github,stackoverflow,codeforce,google'
+    names: '拿个offer,知乎,掘金,博客园'
     details:
-      - baidu.com
-      - github.com
-      - stackoverflow.com
-      - codeforce.com
+      - nageoffer.com
+      - zhihu.com
+      - juejin.cn
+      - cnblogs.com

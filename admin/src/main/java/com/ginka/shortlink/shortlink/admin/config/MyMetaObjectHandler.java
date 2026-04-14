@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * 创建时间填充
  */
-@Component
+@Component(value = "myMetaObjectHandlerByAdmin")
 public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {

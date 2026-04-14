@@ -2,6 +2,7 @@ package com.ginka.shortlink.shortlink.project.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -9,7 +10,8 @@ import java.util.Date;
 /**
  * 创建时间填充
  */
-@Component
+@Primary
+@Component(value = "myMetaObjectHandlerByProject")
 public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
